@@ -11,6 +11,10 @@ if sys.version_info < (3, 10):
     sys.exit(1)
 
 import os
+import platform
+import socket
+import datetime
+import random
 import webbrowser
 from itertools import zip_longest
 
@@ -129,27 +133,125 @@ def show_help():
     Prompt.ask("[dim]Press Enter to return[/dim]", default="")
 
 
+# ── Header: ASCII art + live system info ──────────────────────────────────────
+
+# "HT" block-letter art — 6 lines, ~20 cols wide
+_BANNER_ART = (
+    " ██╗  ██╗████████╗\n"
+    " ██║  ██║╚══██╔══╝\n"
+    " ███████║   ██║   \n"
+    " ██╔══██║   ██║   \n"
+    " ██║  ██║   ██║   \n"
+    " ╚═╝  ╚═╝   ╚═╝   "
+)
+
+_QUOTES = [
+    '"The quieter you become, the more you can hear."',
+    '"Offense informs defense."',
+    '"There is no patch for human stupidity."',
+    '"In God we trust. All others we monitor."',
+    '"Hackers are the immune system of the internet."',
+    '"Every system is hackable — know yours before others do."',
+    '"Enumerate before you exploit."',
+    '"A scope defines your playground."',
+    '"The more you sweat in training, the less you bleed in battle."',
+    '"Security is a process, not a product."',
+]
+
+
+def _sys_info() -> dict:
+    """Collect live system info for the header panel."""
+    info: dict = {}
+
+    # OS pretty name
+    try:
+        info["os"] = platform.freedesktop_os_release().get("PRETTY_NAME", "")
+    except Exception:
+        info["os"] = ""
+    if not info["os"]:
+        info["os"] = f"{platform.system()} {platform.release()}"
+
+    info["kernel"] = platform.release()
+
+    # Current user
+    try:
+        info["user"] = os.getlogin()
+    except Exception:
+        info["user"] = os.environ.get("USER", os.environ.get("LOGNAME", "root"))
+
+    info["host"] = socket.gethostname()
+
+    # Local IP — connect to a routable address without sending data
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(0)
+        s.connect(("10.254.254.254", 1))
+        info["ip"] = s.getsockname()[0]
+        s.close()
+    except Exception:
+        info["ip"] = "127.0.0.1"
+
+    info["time"] = datetime.datetime.now().strftime("%Y-%m-%d  %H:%M")
+    return info
+
+
+def _build_header() -> Panel:
+    info = _sys_info()
+
+    # Each art line paired with a stat line so the │ separator runs full height
+    art_lines = _BANNER_ART.split("\n")   # 6 lines
+
+    stat_lines = [
+        ("  os      ›  ", info["os"][:34]),
+        ("  kernel  ›  ", info["kernel"][:34]),
+        ("  user    ›  ", f"{info['user']} @ {info['host'][:20]}"),
+        ("  ip      ›  ", info["ip"]),
+        ("  tools   ›  ", f"{len(all_tools)} categories · 150+ modules"),
+        ("  session ›  ", info["time"]),
+    ]
+
+    grid = Table.grid(padding=0)
+    grid.add_column("art", no_wrap=True)
+    grid.add_column("sep", no_wrap=True)
+    grid.add_column("lbl", no_wrap=True)
+    grid.add_column("val", no_wrap=True)
+
+    for art_line, (lbl_text, val_text) in zip(art_lines, stat_lines):
+        grid.add_row(
+            Text(art_line, style="bold bright_green"),
+            Text("    │  ", style="dim green"),
+            Text(lbl_text, style="dim green"),
+            Text(val_text, style="bright_green"),
+        )
+
+    # Quote + warning below the split row
+    quote = random.choice(_QUOTES)
+    body = Table.grid(padding=(0, 0))
+    body.add_column()
+    body.add_row(grid)
+    body.add_row(Text(""))
+    body.add_row(Text(f"  {quote}", style="italic dim"))
+    body.add_row(Text("  ⚠  For authorized security testing only",
+                      style="bold dim red"))
+    body.add_row(Text(""))
+
+    return Panel(
+        body,
+        title=f"[bold bright_magenta][ HackingTool {VERSION_DISPLAY} ][/bold bright_magenta]",
+        title_align="left",
+        subtitle=f"[dim][ {info['time']} ][/dim]",
+        subtitle_align="right",
+        border_style="bright_magenta",
+        box=box.HEAVY,
+        padding=(0, 1),
+    )
+
+
 # ── Main menu renderer ─────────────────────────────────────────────────────────
 
 def build_menu():
     clear_screen()
-
-    # ── Compact header ──
-    console.print(Panel(
-        Text.assemble(
-            ("\n    ⚔   H A C K I N G  T O O L\n\n", "bold magenta"),
-            ("    All-in-One Security Research Framework", "white"),
-            ("   ·   ", "dim"),
-            (VERSION_DISPLAY, "bold green"),
-            ("\n    ", ""),
-            (REPO_WEB_URL, "dim cyan"),
-            ("\n\n    ", ""),
-            ("For authorized security testing only\n", "dim red"),
-        ),
-        box=box.HEAVY,
-        border_style="magenta",
-        padding=(0, 2),
-    ))
+    console.print(_build_header())
 
     # ── 2-column category grid ──
     # Items 1-17 in two columns, item 18 (ToolManager) shown separately
