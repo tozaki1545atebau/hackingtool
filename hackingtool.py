@@ -135,15 +135,21 @@ def show_help():
 
 # ── Header: ASCII art + live system info ──────────────────────────────────────
 
-# "HT" block-letter art — 6 lines, ~20 cols wide
-_BANNER_ART = (
-    " ██╗  ██╗████████╗\n"
-    " ██║  ██║╚══██╔══╝\n"
-    " ███████║   ██║   \n"
-    " ██╔══██║   ██║   \n"
-    " ██║  ██║   ██║   \n"
-    " ╚═╝  ╚═╝   ╚═╝   "
-)
+# Full "HACKING TOOL" block-letter art — 12 lines, split layout with stats
+_BANNER_ART = [
+    " ██╗  ██╗ █████╗  ██████╗██╗  ██╗██╗███╗   ██╗ ██████╗ ",
+    " ██║  ██║██╔══██╗██╔════╝██║ ██╔╝██║████╗  ██║██╔════╝ ",
+    " ███████║███████║██║     █████╔╝ ██║██╔██╗ ██║██║  ███╗",
+    " ██╔══██║██╔══██║██║     ██╔═██╗ ██║██║╚██╗██║██║   ██║",
+    " ██║  ██║██║  ██║╚██████╗██║  ██╗██║██║ ╚████║╚██████╔╝",
+    " ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝ ╚═════╝ ",
+    "        ████████╗ ██████╗  ██████╗ ██╗",
+    "        ╚══██╔══╝██╔═══██╗██╔═══██╗██║",
+    "           ██║   ██║   ██║██║   ██║██║",
+    "           ██║   ██║   ██║██║   ██║██║",
+    "           ██║   ╚██████╔╝╚██████╔╝███████╗",
+    "           ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝",
+]
 
 _QUOTES = [
     '"The quieter you become, the more you can hear."',
@@ -198,9 +204,7 @@ def _sys_info() -> dict:
 def _build_header() -> Panel:
     info = _sys_info()
 
-    # Each art line paired with a stat line so the │ separator runs full height
-    art_lines = _BANNER_ART.split("\n")   # 6 lines
-
+    # 12 stat lines paired with the 12 art lines
     stat_lines = [
         ("  os      ›  ", info["os"][:34]),
         ("  kernel  ›  ", info["kernel"][:34]),
@@ -208,6 +212,12 @@ def _build_header() -> Panel:
         ("  ip      ›  ", info["ip"]),
         ("  tools   ›  ", f"{len(all_tools)} categories · 150+ modules"),
         ("  session ›  ", info["time"]),
+        ("", ""),
+        ("  python  ›  ", f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"),
+        ("  arch    ›  ", platform.machine()),
+        ("  status  ›  ", "✔ READY"),
+        ("", ""),
+        ("", ""),
     ]
 
     grid = Table.grid(padding=0)
@@ -216,10 +226,10 @@ def _build_header() -> Panel:
     grid.add_column("lbl", no_wrap=True)
     grid.add_column("val", no_wrap=True)
 
-    for art_line, (lbl_text, val_text) in zip(art_lines, stat_lines):
+    for art_line, (lbl_text, val_text) in zip(_BANNER_ART, stat_lines):
         grid.add_row(
             Text(art_line, style="bold bright_green"),
-            Text("    │  ", style="dim green"),
+            Text("  │ ", style="dim green"),
             Text(lbl_text, style="dim green"),
             Text(val_text, style="bright_green"),
         )
@@ -233,7 +243,6 @@ def _build_header() -> Panel:
     body.add_row(Text(f"  {quote}", style="italic dim"))
     body.add_row(Text("  ⚠  For authorized security testing only",
                       style="bold dim red"))
-    body.add_row(Text(""))
 
     return Panel(
         body,

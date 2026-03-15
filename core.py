@@ -9,6 +9,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.table import Table
+from rich.text import Text
 from rich.theme import Theme
 from rich.traceback import install
 
@@ -50,6 +51,26 @@ def validate_input(ip, val_range: list) -> int | None:
     except (TypeError, ValueError):
         pass
     return None
+
+
+def _show_inline_help():
+    """Quick help available from any menu level."""
+    console.print(Panel(
+        Text.assemble(
+            ("  Navigation\n", "bold white"),
+            ("  ─────────────────────────────────\n", "dim"),
+            ("  1–N    ", "bold cyan"), ("select item\n", "white"),
+            ("  99     ", "bold cyan"), ("go back\n", "white"),
+            ("  98     ", "bold cyan"), ("open project page\n", "white"),
+            ("  ?      ", "bold cyan"), ("show this help\n", "white"),
+            ("  q      ", "bold cyan"), ("quit hackingtool\n", "white"),
+        ),
+        title="[bold magenta] ? Quick Help [/bold magenta]",
+        border_style="magenta",
+        box=box.ROUNDED,
+        padding=(0, 2),
+    ))
+    Prompt.ask("[dim]Press Enter to return[/dim]", default="")
 
 
 class HackingTool:
@@ -115,14 +136,24 @@ class HackingTool:
                 table.add_row("98", "Open Project Page")
             table.add_row("99", f"Back to {parent.TITLE if parent else 'Main Menu'}")
             console.print(table)
+            console.print(
+                "[dim]  Enter number  ·  [bold cyan]?[/bold cyan] help"
+                "  ·  [bold cyan]q[/bold cyan] quit[/dim]"
+            )
 
-            raw = Prompt.ask("\n[bold cyan][?] Select an option[/bold cyan]", default="")
-            if not raw.strip():
+            raw = Prompt.ask("\n[bold cyan]>[/bold cyan]", default="").strip().lower()
+            if not raw:
                 continue
+            if raw in ("?", "help"):
+                _show_inline_help()
+                continue
+            if raw in ("q", "quit", "exit"):
+                raise SystemExit(0)
+
             try:
                 choice = int(raw)
             except ValueError:
-                console.print("[error]⚠ Please enter a number.[/error]")
+                console.print("[error]⚠ Enter a number, ? for help, or q to quit.[/error]")
                 Prompt.ask("[dim]Press Enter to continue[/dim]", default="")
                 continue
 
@@ -278,14 +309,24 @@ class HackingToolsCollection:
 
             table.add_row("99", f"Back to {parent.TITLE if parent else 'Main Menu'}", "")
             console.print(table)
+            console.print(
+                "[dim]  Enter number  ·  [bold cyan]?[/bold cyan] help"
+                "  ·  [bold cyan]q[/bold cyan] quit[/dim]"
+            )
 
-            raw = Prompt.ask("\n[bold cyan][?] Choose a tool[/bold cyan]", default="")
-            if not raw.strip():
+            raw = Prompt.ask("\n[bold cyan]>[/bold cyan]", default="").strip().lower()
+            if not raw:
                 continue
+            if raw in ("?", "help"):
+                _show_inline_help()
+                continue
+            if raw in ("q", "quit", "exit"):
+                raise SystemExit(0)
+
             try:
                 choice = int(raw)
             except ValueError:
-                console.print("[error]⚠ Please enter a number.[/error]")
+                console.print("[error]⚠ Enter a number, ? for help, or q to quit.[/error]")
                 continue
 
             if choice == 99:
