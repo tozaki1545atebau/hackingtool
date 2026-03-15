@@ -113,10 +113,12 @@ class HackingTool:
 
             if self.PROJECT_URL:
                 table.add_row("98", "Open Project Page")
-            table.add_row("99", f"Back to {parent.TITLE if parent else 'Exit'}")
+            table.add_row("99", f"Back to {parent.TITLE if parent else 'Main Menu'}")
             console.print(table)
 
-            raw = Prompt.ask("\n[bold cyan][?] Select an option[/bold cyan]", default="99")
+            raw = Prompt.ask("\n[bold cyan][?] Select an option[/bold cyan]", default="")
+            if not raw.strip():
+                continue
             try:
                 choice = int(raw)
             except ValueError:
@@ -125,9 +127,7 @@ class HackingTool:
                 continue
 
             if choice == 99:
-                if parent is None:
-                    sys.exit()
-                return 99
+                return
             elif choice == 98 and self.PROJECT_URL:
                 self.show_project_page()
             elif 1 <= choice <= len(self.OPTIONS):
@@ -272,10 +272,12 @@ class HackingToolsCollection:
             if incompatible:
                 console.print(f"[dim]({len(incompatible)} tools hidden — not supported on current OS)[/dim]")
 
-            table.add_row("99", f"Back to {parent.TITLE if parent else 'Exit'}")
+            table.add_row("99", f"Back to {parent.TITLE if parent else 'Main Menu'}")
             console.print(table)
 
-            raw = Prompt.ask("\n[bold cyan][?] Choose a tool[/bold cyan]", default="99")
+            raw = Prompt.ask("\n[bold cyan][?] Choose a tool[/bold cyan]", default="")
+            if not raw.strip():
+                continue
             try:
                 choice = int(raw)
             except ValueError:
@@ -283,9 +285,7 @@ class HackingToolsCollection:
                 continue
 
             if choice == 99:
-                if parent is None:
-                    sys.exit()
-                return 99
+                return
             elif choice == 98 and archived:
                 self._show_archived_tools()
             elif 0 <= choice < len(active):

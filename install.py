@@ -107,11 +107,14 @@ def install_system_packages():
         console.print("[warning]Skipping system packages — no package manager found.[/warning]")
         return
 
+    # Use sudo only when not already root (uid != 0).
+    # Inside Docker we run as root and sudo is not installed.
+    priv = "" if os.geteuid() == 0 else "sudo "
+
     # Update index first (skip for brew — not needed)
     if mgr != "brew":
         update_cmd = PACKAGE_UPDATE_CMDS.get(mgr, "")
         if update_cmd:
-            priv = "" if CURRENT_OS.system == "macos" else "sudo "
             console.print(f"[dim]Updating package index ({mgr})...[/dim]")
             subprocess.run(f"{priv}{update_cmd}", shell=True, check=False)
 
@@ -121,7 +124,6 @@ def install_system_packages():
 
     install_tpl = PACKAGE_INSTALL_CMDS[mgr]
     cmd = install_tpl.format(packages=" ".join(packages))
-    priv = "" if CURRENT_OS.system == "macos" else "sudo "
     console.print(f"[dim]Installing system dependencies ({mgr})...[/dim]")
     result = subprocess.run(f"{priv}{cmd}", shell=True, check=False)
     if result.returncode != 0:

@@ -12,7 +12,7 @@ LABEL org.opencontainers.image.title="hackingtool" \
 # - --no-install-recommends keeps the layer lean
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        git python3-pip curl wget php && \
+        git python3-pip python3-venv curl wget php && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /root/hackingtool
