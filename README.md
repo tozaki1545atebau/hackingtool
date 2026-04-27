@@ -67,6 +67,8 @@ sudo python3 hackingtool.py
 
 Navigate through the menu using the numbered options.
 
+> **Personal note:** I primarily use this on Kali Linux inside a VirtualBox VM for CTF practice and home lab exercises. Tested and working well on Kali 2024.1.
+
 ## 📁 Project Structure
 
 ```
