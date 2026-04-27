@@ -72,6 +72,8 @@ Navigate through the menu using the numbered options.
 > **Tip:** If the menu rendering looks off in your terminal, try setting `export TERM=xterm-256color` before running.
 >
 > **Tip:** Running inside tmux? Add `export PYTHONUNBUFFERED=1` as well to avoid output buffering issues with the interactive menu.
+>
+> **Tip:** If you get a `ModuleNotFoundError` on first run, try `pip3 install -r requirements.txt --break-system-packages` on newer Debian/Ubuntu-based systems that enforce PEP 668.
 
 ## 📁 Project Structure
 
@@ -110,6 +112,3 @@ Contributions are welcome! Please read our [Pull Request Template](.github/PULL_
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgements
-
-- Original project by [Z4nzu](https://github.com/Z4nzu/hackingtool)
-- All tool authors and contributors
